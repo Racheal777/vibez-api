@@ -111,11 +111,15 @@ vibes/
 
 ### Authentication Endpoints
 
-| Method | Endpoint | Description | Authentication Required |
-|--------|----------|-------------|------------------------|
-| POST | `/api/auth/signup/` | Register new user | No |
-| POST | `/api/auth/login/` | Login user | No |
-| POST | `/api/auth/logout/` | Logout user | Yes |
+| Method | Endpoint                | Description                              | Authentication Required |
+|--------|--------------------------|------------------------------------------|--------------------------|
+| POST   | `/api/auth/signup/`      | Register a new user                      | No                       |
+| POST   | `/api/auth/login/`       | Login user                               | No                       |
+| POST   | `/api/auth/logout/`      | Logout user                              | Yes                      |
+| POST   | `/api/posts/`            | Create a new post with media             | Yes                      |
+| GET    | `/api/posts/`            | Retrieve all posts with media            | Yes                      |
+| GET    | `/api/posts/{post_id}/`  | Retrieve a specific post with media      | Yes                      |
+| DELETE | `/api/posts/{post_id}/`  | Delete a specific post                   | Yes                      |
 
 
 ##  Usage Examples
@@ -177,6 +181,117 @@ vibes/
 ```bash
 curl -H "Authorization: Token your_access_token" \
      -X GET http://localhost:8000/api/auth/logout
+```
+
+--
+
+### Create a New Post
+**Endpoint:** `POST /api/posts/`
+
+**Request:**
+```json
+{
+    "content": "Exciting day at the park!",
+    "media_files": [
+        "path/to/image1.jpg",
+        "path/to/video1.mp4"
+    ]
+}
+```
+
+**Response:**
+```json
+{
+    "post": {
+        "id": 1,
+        "content": "Exciting day at the park!",
+        "created_at": "2024-10-31T14:32:00Z",
+        "user": 1,
+        "media": [
+            {
+                "id": 101,
+                "media_url": "https://res.cloudinary.com/.../image1.jpg",
+                "media_type": "image",
+                "created_at": "2024-10-31T14:32:01Z"
+            },
+            {
+                "id": 102,
+                "media_url": "https://res.cloudinary.com/.../video1.mp4",
+                "media_type": "video",
+                "created_at": "2024-10-31T14:32:01Z"
+            }
+        ]
+    }
+}
+```
+
+---
+
+### Retrieve All Posts
+**Endpoint:** `GET /api/posts/`
+
+**Response:**
+```json
+[
+    {
+        "id": 1,
+        "content": "Exciting day at the park!",
+        "created_at": "2024-10-31T14:32:00Z",
+        "user": 1,
+        "media": [
+            {
+                "id": 101,
+                "media_url": "https://res.cloudinary.com/.../image1.jpg",
+                "media_type": "image"
+            },
+            {
+                "id": 102,
+                "media_url": "https://res.cloudinary.com/.../video1.mp4",
+                "media_type": "video"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "content": "Another beautiful sunset.",
+        "created_at": "2024-10-30T18:20:00Z",
+        "user": 2,
+        "media": [
+            {
+                "id": 103,
+                "media_url": "https://res.cloudinary.com/.../sunset.jpg",
+                "media_type": "image"
+            }
+        ]
+    }
+]
+```
+
+---
+
+### Retrieve a Specific Post
+**Endpoint:** `GET /api/posts/{post_id}/`
+
+**Response:**
+```json
+{
+    "id": 1,
+    "content": "Exciting day at the park!",
+    "created_at": "2024-10-31T14:32:00Z",
+    "user": 1,
+    "media": [
+        {
+            "id": 101,
+            "media_url": "https://res.cloudinary.com/.../image1.jpg",
+            "media_type": "image"
+        },
+        {
+            "id": 102,
+            "media_url": "https://res.cloudinary.com/.../video1.mp4",
+            "media_type": "video"
+        }
+    ]
+}
 ```
 
 ##  Contributing
