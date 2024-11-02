@@ -4,9 +4,10 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Post
-from .serializers import PostSerializer
+from .models import Post, Like, Comment
+from .serializers import PostSerializer, CommentSerializer
 from rest_framework.generics import get_object_or_404
+from rest_framework.authentication import TokenAuthentication
 
 
 
@@ -15,7 +16,6 @@ class PostListView(APIView):
 
     def post(self, request):
         user = request.user
-        print(request.data)
 
         post_data = request.data
 
@@ -44,6 +44,7 @@ class PostDetailsView(APIView):
     def get_object(self, pk):
         return get_object_or_404(Post, pk=pk)
 
+
     def get(self, request, pk):
         post = self.get_object(pk)
         serializer = PostSerializer(post)
@@ -55,4 +56,93 @@ class PostDetailsView(APIView):
         if post.user != request.user:
             return  Response({"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
         post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LikePostView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, post_id):
+        user = request.user
+
+
+        try:
+            post = Post.objects.get(id=post_id)
+
+        except Post.DoesNotExist:
+            return Response({'error': "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        like, created = Like.objects.get_or_create(user=user, post=post)
+
+        if not  created:
+            like.delete()
+            return Response({'message': "post unliked"}, status=status.HTTP_200_OK)
+        return Response({'message': 'post liked'}, status=status.HTTP_201_CREATED)
+
+
+
+
+class LikeCommentView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, comment_id):
+        user = request.user
+
+        try:
+            comment = Comment.objects.get(id=comment_id)
+
+        except Comment.DoesNotExist:
+            return Response({'error': "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        like, created = Like.objects.get_or_create(user=user, comment=comment)
+
+        if not  created:
+            like.delete()
+            return Response({'"message': "comment unliked"}, status=status.HTTP_200_OK)
+        return Response({'message': 'comment liked'}, status=status.HTTP_201_CREATED)
+
+
+
+class CommentPostView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, post_id= None, parent_id=None):
+        user = request.user
+
+        comment_data = request.data.dict()
+
+        comment_data['user'] = user.id
+        comment_data['post'] = post_id
+        comment_data['parent'] = parent_id
+
+        print("Incoming data:", comment_data)
+        serializer = CommentSerializer(data=comment_data)
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+class CommentDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        return get_object_or_404(Comment, pk=pk)
+
+
+    def get(self, request, pk):
+        comment = self.get_object(pk)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def delete(self, request, pk):
+        comment = self.get_object(pk)
+        if comment.user != request.user:
+            return  Response({"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
