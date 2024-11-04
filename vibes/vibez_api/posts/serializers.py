@@ -1,7 +1,7 @@
 import os
 
 from rest_framework import serializers
-from .models import Post, Like, Comment, PostMedia, CommentMedia
+from .models import Post, Like, Comment, PostMedia, CommentMedia, HashTag
 from ..uploads import upload_file
 
 
@@ -44,7 +44,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
     def get_replies(self, obj):
-        return  CommentSerializer(obj.replies, many=True).data
+
+        replies = Comment.objects.filter(parent=obj).order_by('-created_at')
+        return  CommentSerializer(replies, many=True).data
 
 
 
@@ -80,22 +82,35 @@ class CommentSerializer(serializers.ModelSerializer):
             return 'unknown'
 
 
+class HashTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HashTag
+        fields = ['name']  # Add any additional fields as necessary
 
 
 class PostSerializer(serializers.ModelSerializer):
     media = PostMediaSerializer(many=True, read_only=True)
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
-    comments = CommentSerializer(many=True, required=False, read_only=True)
+    comments = serializers.SerializerMethodField()
+    hashtags = HashTagSerializer(many=True, read_only=True)
     media_files = serializers.ListField(
         child=serializers.FileField(),
         write_only=True,
         required=False
     )
 
+
+
+    def get_comments(self, obj):
+        comments = Comment.objects.filter(post=obj, parent=None).order_by('-created_at')
+        return CommentSerializer(comments, many=True).data
+
+
     class Meta:
         model = Post
-        fields = ['id', 'content', 'user', 'created_at','comments', 'likes_count', 'media', 'media_files']
+        fields = ['id', 'content', 'user', 'created_at','hashtags', 'comments', 'likes_count', 'media', 'media_files']
         read_only_fields = ['user', 'created_at']
+        ordering = ['-created_at']
 
 
     def create(self, validated_data):

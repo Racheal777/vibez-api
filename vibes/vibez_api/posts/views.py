@@ -4,10 +4,16 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, HashTag, PostHashTag
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.generics import get_object_or_404
 from rest_framework.authentication import TokenAuthentication
+import re
+
+def extract_hashtags(content):
+    hashtag = re.findall(r"#(\w+)", content)
+    print('hash', hashtag)
+    return hashtag
 
 
 
@@ -21,11 +27,18 @@ class PostListView(APIView):
 
         post_data['user'] = user.id
 
-        print("Incoming data:", post_data)
         serializer = PostSerializer(data=post_data, context={'request': request})
 
         if serializer.is_valid():
-            serializer.save(user=request.user)
+
+            post = serializer.save(user=request.user)
+            content = post_data.get('content', '')
+            hashtags = extract_hashtags(content)
+
+            for tag_name in hashtags:
+                hashtag, created = HashTag.objects.get_or_create(name=tag_name.lower())
+
+                PostHashTag.objects.create(post=post, hashtag=hashtag, added_by=user )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -35,6 +48,22 @@ class PostListView(APIView):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PostHashtagsView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, hashtag):
+       try:
+           hashtag_obj = HashTag.objects.get(name=hashtag)
+
+           posts = Post.objects.filter(hashtags=hashtag_obj)
+
+           serializer = PostSerializer(posts, many=True)
+           return Response(serializer.data, status=status.HTTP_200_OK)
+
+       except HashTag.DoesNotExist:
+           return Response({"errors": "Hashtag not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 
@@ -57,6 +86,9 @@ class PostDetailsView(APIView):
             return  Response({"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
 
 class LikePostView(APIView):
     authentication_classes = [TokenAuthentication]

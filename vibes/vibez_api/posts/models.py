@@ -5,7 +5,11 @@ from django.contrib.auth.models import User
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(blank=True, null=True)
+    hashtags = models.ManyToManyField("HashTag", related_name='posts', through='PostHashTag', null=True )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class PostMedia(models.Model):
@@ -74,3 +78,17 @@ class CommentMedia(models.Model):
 
 
 
+class HashTag(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class PostHashTag(models.Model):
+   post = models.ForeignKey(Post, on_delete=models.CASCADE)
+   hashtag = models.ForeignKey(HashTag, on_delete=models.CASCADE)
+   date_added = models.DateTimeField(auto_now_add=True)
+   added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+   class Meta:
+       unique_together = ('post', 'hashtag')
