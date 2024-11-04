@@ -53,6 +53,8 @@ class CommentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         media_data = validated_data.pop('media_files', [])
+        if len(media_data) > 2:
+            raise serializers.ValidationError({'errors': f"Cannot upload more than {2} files."})
 
         comment = Comment.objects.create(**validated_data)
 
@@ -72,7 +74,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_media_type(self, media_url):
         extension = os.path.splitext(media_url)[1].lower()
-        print('eee', extension)
+
 
         if extension in ['.jpg', '.jpeg', '.png', '.gif']:
             return 'image'
@@ -115,6 +117,8 @@ class PostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         media_data = validated_data.pop('media_files', [])
+        if len(media_data) > 4:
+            raise  serializers.ValidationError({'errors': f"Cannot upload more than {4} files."})
         post = Post.objects.create(**validated_data)
 
         for media_file in media_data:
@@ -135,7 +139,6 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_media_type(self, media_url):
         extension = os.path.splitext(media_url)[1].lower()
-        print('eee', extension)
 
         if extension in ['.jpg', '.jpeg', '.png', '.gif']:
             return 'image'

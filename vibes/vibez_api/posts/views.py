@@ -1,4 +1,5 @@
-from gc import get_objects
+from datetime import timedelta
+from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -12,7 +13,6 @@ import re
 
 def extract_hashtags(content):
     hashtag = re.findall(r"#(\w+)", content)
-    print('hash', hashtag)
     return hashtag
 
 
@@ -80,6 +80,38 @@ class PostDetailsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+    def update(self, request, pk):
+        post = self.get_object(pk)
+        if post.user != request.user:
+            return  Response({"error": "You do not have permission to update this post."}, status=status.HTTP_403_FORBIDDEN)
+
+        time_passed = timezone.now() - post.created_at
+
+        if time_passed > timedelta(minutes=20):
+            return Response({'error': 'You can only update posts within 20 minutes of creation'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = PostSerializer(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            content = request.data.get('content', '')
+            hashtags = extract_hashtags(content)
+
+            post.hashtags.clear()
+
+            for tag_name in hashtags:
+                hashtag, created = HashTag.objects.get_or_create(name=tag_name.lower())
+
+                PostHashTag.objects.create(post=post, hashtag=hashtag, added_by=request.user)
+            serializer.save()
+
+            return  Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def patch(self, request, pk):
+        return  self.update(request, pk)
+
+
     def delete(self, request, pk):
         post = self.get_object(pk)
         if post.user != request.user:
@@ -140,13 +172,12 @@ class CommentPostView(APIView):
     def post(self, request, post_id= None, parent_id=None):
         user = request.user
 
-        comment_data = request.data.dict()
+        comment_data = request.data
 
         comment_data['user'] = user.id
         comment_data['post'] = post_id
         comment_data['parent'] = parent_id
 
-        print("Incoming data:", comment_data)
         serializer = CommentSerializer(data=comment_data)
 
         if serializer.is_valid():
