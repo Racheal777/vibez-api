@@ -2,12 +2,12 @@ services:
   web:
     image: rachealcodez/vibez:latest
     env_file:
-      - .env  # Ensures all environment variables from .env file are loaded
+      - .env
     environment:
       - DB_NAME=${DATABASE_NAME}
       - DB_USER=${DATABASE_USER}
       - DB_PASSWORD=${DATABASE_PASSWORD}
-      - DB_HOST=localhost
+      - DB_HOST=db  # Use the service name "db"
       - DB_PORT=5432
       - API_KEY=${API_KEY}
       - API_SECRET=${API_SECRET}
@@ -35,15 +35,14 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
-
 
 volumes:
   postgres_data:

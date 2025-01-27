@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(blank=True, null=True)
-    hashtags = models.ManyToManyField("HashTag", related_name='posts', through='PostHashTag', null=True )
+    hashtags = models.ManyToManyField("HashTag", related_name='posts', through='PostHashTag', )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -33,8 +33,8 @@ class PostMedia(models.Model):
 
 
 class Like(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes", null=True, blank=True)
-    comment = models.ForeignKey("Comment", on_delete=models.CASCADE, related_name="likes", null=True, blank=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes",  blank=True)
+    comment = models.ForeignKey("Comment", on_delete=models.CASCADE, related_name="likes",  blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
     created_at = models.DateTimeField(auto_now_add=True)
 
