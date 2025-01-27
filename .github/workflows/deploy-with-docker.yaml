@@ -18,7 +18,7 @@ jobs:
       # Step 2: Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t vibez:latest .
+          docker build -t vibez:latest -f vibes/Dockerfile .
 
       # Step 3: Push Docker Image to Registry
       # Replace with your Docker registry
