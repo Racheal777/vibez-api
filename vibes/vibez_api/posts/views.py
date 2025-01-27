@@ -172,7 +172,7 @@ class CommentPostView(APIView):
     def post(self, request, post_id= None, parent_id=None):
         user = request.user
 
-        comment_data = request.data
+        comment_data = request.data.copy()
 
         comment_data['user'] = user.id
         comment_data['post'] = post_id
