@@ -33,6 +33,18 @@ jobs:
           docker tag vibez:latest rachealcodez/vibez:latest
           docker push rachealcodez/vibez:latest
 
+
+      - name: Transfer .env File
+        uses: appleboy/scp-action@v0.1.4
+        with:
+            host: ${{ secrets.IP_ADDRESS }}
+            username: ubuntu
+            key: ${{ secrets.SSH_KEY }}
+            port: ${{ secrets.PORT }}
+            source: vibes/.env
+            target: /home/ubuntu/api/vibes/.env
+
+
       # Step 4: Deploy Docker Image on EC2
       - name: Transfer Docker Compose or Deployment Script
         uses: appleboy/scp-action@v0.1.4
