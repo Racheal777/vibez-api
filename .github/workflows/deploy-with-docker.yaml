@@ -13,7 +13,7 @@ jobs:
     steps:
       # Step 1: Checkout Code
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       # Step 2: Build Docker Image
       - name: Build Docker Image
@@ -53,16 +53,15 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            mkdir -p /home/ubuntu/api
             cd /home/ubuntu/api/vibes
             
-           echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" > .env
-           echo "DATABASE_USER=${{ secrets.DATABASE_NAME }}" > .env
-           echo "DATABASE_USER=${{ secrets.DATABASE_HOST }}" > .env
-           echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-           echo "API_KEY=${{ secrets.API_KEY }}" >> .env
-           echo "DATABASE_USER=${{ secrets.API_SECRET }}" > .env
-           echo "DATABASE_USER=${{ secrets.CLOUD_NAME }}" > .env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" > .env
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+            echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+            echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+            echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
+            echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
            
             
             docker-compose down || true
