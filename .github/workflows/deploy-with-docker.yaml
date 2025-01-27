@@ -62,9 +62,9 @@ jobs:
             
             cd /home/ubuntu/api/vibes
             
-            echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DATABASE_NAME }}" > .env
+            echo "DB_USER=${{ secrets.DATABASE_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
             echo "API_KEY=${{ secrets.API_KEY }}" >> .env
             echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
             echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
