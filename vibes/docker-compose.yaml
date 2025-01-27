@@ -2,13 +2,16 @@ services:
   web:
     image: rachealcodez/vibez:latest
     env_file:
-      - .env
+      - .env  # Ensures all environment variables from .env file are loaded
     environment:
       - DB_NAME=${DATABASE_NAME}
       - DB_USER=${DATABASE_USER}
       - DB_PASSWORD=${DATABASE_PASSWORD}
       - DB_HOST=localhost
       - DB_PORT=5432
+      - API_KEY=${API_KEY}
+      - API_SECRET=${API_SECRET}
+      - CLOUD_NAME=${CLOUD_NAME}
     ports:
       - "8001:8000"
     depends_on:
