@@ -41,7 +41,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
-          source: /docker-compose.yaml
+          source: vibes/docker-compose.yaml
           target: /home/ubuntu/api
 
       - name: Deploy Docker Container on EC2
