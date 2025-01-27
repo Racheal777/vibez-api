@@ -16,7 +16,7 @@ RUN apk add --no-cache build-base gcc libffi-dev musl-dev postgresql-dev \
 COPY .. .
 
 # Run database migrations during the build process
-RUN python manage.py migrate
+#RUN python manage.py migrate
 
 # Expose the port the app will run on
 EXPOSE 8000
