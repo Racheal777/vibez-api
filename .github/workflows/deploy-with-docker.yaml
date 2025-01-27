@@ -53,24 +53,25 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            sudo apt-get update -y
-            sudo apt-get install -y docker.io
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
+            sudo apt-get update
+            sudo apt-get install -y docker.io docker-compose
+            sudo systemctl start docker
+            sudo systemctl enable docker
             sudo usermod -aG docker ubuntu
-            sudo chmod 666 /var/run/docker.sock
+            newgrp docker
             
             cd /home/ubuntu/api/vibes
             
-            echo "DB_NAME=${{ secrets.DATABASE_NAME }}" > .env
-            echo "DB_USER=${{ secrets.DATABASE_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > .env
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
             echo "API_KEY=${{ secrets.API_KEY }}" >> .env
             echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
             echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
+
            
-            cat .env
+            sudo cat .env
             
-            docker-compose down || true
-            docker-compose pull
-            docker-compose up -d
+            sudo docker-compose down || true
+            sudo docker-compose pull
+            sudo docker-compose up -d
