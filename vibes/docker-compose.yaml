@@ -1,7 +1,6 @@
 services:
   web:
-    build: .
-    container_name: django_api
+    image: rachealcodez/vibez:latest
     env_file:
       - .env
     environment:
