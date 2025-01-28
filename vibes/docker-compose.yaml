@@ -13,7 +13,7 @@ services:
       - API_SECRET=${API_SECRET}
       - CLOUD_NAME=${CLOUD_NAME}
     ports:
-      - "8001:8000"
+      - "8003:8000"
     depends_on:
       - db
     healthcheck:
