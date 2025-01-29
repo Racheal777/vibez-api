@@ -97,7 +97,7 @@ DATABASES = {
         'NAME': os.getenv('DATABASE_NAME'),
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
+        'HOST': os.getenv('DATABASE_HOST', 'db'),
         # 'OPTIONS': {
         #     'sslmode': 'require',
         #     'options': '-c endpoint=ep-wandering-bar-a26rmp8l'

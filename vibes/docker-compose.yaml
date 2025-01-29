@@ -25,9 +25,9 @@ services:
       timeout: 5s
       retries: 5
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "while ! nc -z db 5432; do sleep 1; done &&
+             python manage.py migrate &&
              gunicorn vibes.wsgi:application --bind 0.0.0.0:8000"
-
   db:
     image: postgres:latest
     container_name: postgres
@@ -42,7 +42,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 5
