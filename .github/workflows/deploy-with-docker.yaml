@@ -42,8 +42,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
+          script: echo "Connection successful"
           source: vibes/docker-compose.yaml
           target: /home/ubuntu/api
+          timeout: 30s
+          command_timeout: 2m
 
       - name: Deploy Docker Container on EC2
         uses: appleboy/ssh-action@v1.2.0
