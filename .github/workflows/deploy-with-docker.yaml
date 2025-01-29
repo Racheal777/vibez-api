@@ -70,6 +70,7 @@ jobs:
             echo "API_KEY=${{ secrets.API_KEY }}" >> .env
             echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
             echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
 
            
             sudo cat .env
