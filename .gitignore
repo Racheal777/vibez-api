@@ -1,2 +1,4 @@
 .env
 venv
+/vibes/django_errors.log
+django_errors.log

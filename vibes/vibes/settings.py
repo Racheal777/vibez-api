@@ -10,31 +10,41 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
-from urllib.parse import urlparse
 
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
+
+
+import opentelemetry.instrumentation.django
+from opentelemetry import trace
+
+
+# Instrument Django
+opentelemetry.instrumentation.django.DjangoInstrumentor().instrument()
+
+tracer = trace.get_tracer(__name__)
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
-    'vibes-api.softlife.reggeerr.com',  # Your domain
-    'localhost',                        # For local development
-    '127.0.0.1',                        # For local development
+    '*'
+    # 'vibes-api.softlife.reggeerr.com',  # Your domain
+    # 'localhost',                        # For local development
+    # '127.0.0.1',                        # For local development
 ]
 
 
@@ -69,6 +79,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    "vibes.middleware.RequestCounterMiddleware",
 ]
 
 ROOT_URLCONF = "vibes.urls"
@@ -108,6 +120,40 @@ DATABASES = {
         # },
     }
 }
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "DEBUG",  # Capture all logs from DEBUG level and above
+            "class": "logging.StreamHandler",
+        },
+        "file": {
+            "level": "ERROR",  # Log only errors to a file
+            "class": "logging.FileHandler",
+            "filename": "django_errors.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["console", "file"],  # Logs request errors (500, 404, etc.)
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "django.security": {
+            "handlers": ["console", "file"],  # Logs security issues
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
+
 
 
 # tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
